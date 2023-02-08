@@ -1,0 +1,34 @@
+name: Deploy DO
+on:
+  release:
+    types:
+      - released
+    push:
+      branches: [ main ]
+concurrency: deployment
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: pdo_mysql
+          coverage: none
+          tools: composer:v2
+      - run: composer install
+      - name: Add identity file
+        run: echo "${{ secrets.PRIVATE_KEY }}" >> $HOME/deploy.key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      - run: chmod 600 $HOME/deploy.key
+      - run: eval $(ssh-agent -s)
+      - run: mkdir -p $HOME/.ssh && chmod 700 $HOME/.ssh
+      - run: touch $HOME/.ssh/known_hosts && chmod 644 $HOME/.ssh/known_hosts
+      - name: Keyscan
+        run: ssh-keyscan 159.65.184.142 >> $HOME/.ssh/known_hosts
+      - run: rsync -e "ssh -i $HOME/deploy.key" -rzcElv . root@159.65.184.142:/var/www/html --exclude-from=".rsyncignore" --checksum --delete
+      - run: ssh -i $HOME/deploy.key root@159.65.184.142 'php /var/www/html/vendor/bin/drush deploy --yes'
+
