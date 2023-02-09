@@ -30,6 +30,7 @@ node_modules
 
 # Ignore .env files from being committed
 /.env
+/.htaccess
 
 # Prevent private files from being committed
 /private

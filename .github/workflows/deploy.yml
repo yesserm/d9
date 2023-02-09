@@ -3,9 +3,9 @@ on:
   release:
     types:
       - released
-    push:
-      branches:
-        - main
+  push:
+    branches:
+      - main
 concurrency: deployment
 jobs:
   deploy:
