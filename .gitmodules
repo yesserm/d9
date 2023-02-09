@@ -1,0 +1,3 @@
+[submodule "web/themes/custom/druyes"]
+	path = web/themes/custom/druyes
+	url = git@github.com:yessermiranda13/druyes.git
